@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Content;
 
 namespace HungerPrototype.GameActors
 {
     using Animations;
 
-    public abstract class Actor
+    public class Actor
     {
         #region Declarations
 
@@ -16,9 +17,20 @@ namespace HungerPrototype.GameActors
 
         #endregion
 
+        #region Constructor
+
+        public Actor(ContentManager Content, Vector2 location, int Width, int Height)
+        {
+            this.Location = location;
+            this.Width = Width;
+            this.Height = Height;
+        }
+
+        #endregion 
+
         #region Properties
 
-        public bool Dead
+        public bool Inactive
         {
             get;
             set;
@@ -26,24 +38,7 @@ namespace HungerPrototype.GameActors
 
         #region Movement
 
-        abstract float Friction
-        {
-            get;
-        }
-
-        float Mass
-        {
-            get;
-            set;
-        }
-
-        abstract Vector2 Velocity
-        {
-            get;
-            set;
-        }
-
-        abstract Vector2 Acceleration
+        virtual Vector2 Velocity
         {
             get;
             set;
@@ -59,7 +54,13 @@ namespace HungerPrototype.GameActors
             set;
         }
 
-        abstract Vector2 Location
+        virtual Vector2 Location
+        {
+            get;
+            set;
+        }
+
+        float DrawDepth
         {
             get;
             set;
@@ -77,7 +78,7 @@ namespace HungerPrototype.GameActors
             set;
         }
 
-        abstract Rectangle CollisionRectangle
+        protected Rectangle CollisionRectangle
         {
             get;
             set;
@@ -117,7 +118,7 @@ namespace HungerPrototype.GameActors
 
         #region Collision Detection Methods
 
-        abstract void CollisionTest();
+        protected void CollisionTest();
 
         #endregion
 
@@ -133,7 +134,9 @@ namespace HungerPrototype.GameActors
 
         #endregion
 
-        abstract  void Draw(SpriteBatch spriteBatch)
+        #region Draw
+
+        public virtual void Draw(SpriteBatch spriteBatch)
         {
             if (animations.ContainsKey(currentAnimation))
             {
@@ -144,7 +147,7 @@ namespace HungerPrototype.GameActors
                 {
                     effect = SpriteEffects.FlipHorizontally;
                 }
-                spriteBatch.Draw(animations[currentAnimation].Texture, Camera.WorldToScreen(WorldRectangle),
+                spriteBatch.Draw(animations[currentAnimation].Texture,CollisionRectangle,
                     animations[currentAnimation].FrameRectangle, Color.White, 0.0f, Vector2.Zero, effect, drawDepth);
             }
         }
