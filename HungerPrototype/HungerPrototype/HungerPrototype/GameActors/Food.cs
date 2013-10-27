@@ -26,7 +26,7 @@ namespace HungerPrototype.GameActors
             : base(Location, Width, Height,drawDepth)
         {
             hitTheGround = false;
-            animations.Add("idle", new AnimationStrip(texture, 64, "idle"));
+            animations.Add("idle", new AnimationStrip(texture, 24, "idle"));
             animations["idle"].LoopAnimation = true;
 
             PlayAnimation("idle");
@@ -97,7 +97,6 @@ namespace HungerPrototype.GameActors
 
         void ApplyPhyics()
         {
-
             Velocity += Gravity;
 
             if (Location.Y == WindowBoundaries.Y - Height - 20)
@@ -105,7 +104,6 @@ namespace HungerPrototype.GameActors
                 Velocity = Vector2.Reflect(Velocity, new Vector2(0, 1)) * 0.1f;
                 hitTheGround = true;
             }
-
         }
 
         #endregion

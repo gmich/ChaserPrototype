@@ -57,6 +57,7 @@ namespace HungerPrototype
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
             levelManager = new LevelManager(Content);
+            SoundManager.Initialize(Content);
             background = Content.Load<Texture2D>(@"Textures\background");
             // TODO: use this.Content to load your game content here
         }

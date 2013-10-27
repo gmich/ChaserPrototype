@@ -133,7 +133,7 @@ namespace HungerPrototype.GameActors
 
         protected virtual void CollisionTest() { }
 
-        public bool CollidesWith(Actor actor)
+        public virtual bool CollidesWith(Actor actor)
         {
             return this.CollisionRectangle.Intersects(actor.CollisionRectangle);
         }

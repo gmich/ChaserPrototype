@@ -8,6 +8,8 @@ namespace HungerPrototype.GameActors
 {
     using Input;
     using Animations;
+    using Managers;
+
     public class Player : Actor
     {
 
@@ -15,8 +17,10 @@ namespace HungerPrototype.GameActors
 
         Vector2 velocity;
         Vector2 location;
-        float timeSincePurr;
-
+        string newAnimation;
+        float purrTime;
+        float mewTime;
+        Texture2D mewFace;
         #endregion 
 
         #region Constructor
@@ -30,6 +34,9 @@ namespace HungerPrototype.GameActors
             animations.Add("run", new AnimationStrip(Content.Load<Texture2D>(@"Textures\Run"), 50, "run"));
             animations["run"].LoopAnimation = true;
 
+            animations.Add("mew", new AnimationStrip(Content.Load<Texture2D>(@"Textures\Mew"), 50, "mew"));
+            animations["mew"].LoopAnimation = true;
+
             animations.Add("purr", new AnimationStrip(Content.Load<Texture2D>(@"Textures\purr"), 50, "purr"));
             animations["purr"].LoopAnimation = false;
             animations["purr"].FrameLength = 0.12f;
@@ -40,11 +47,39 @@ namespace HungerPrototype.GameActors
             animations.Add("falling", new AnimationStrip(Content.Load<Texture2D>(@"Textures\Falling"), 50, "falling"));
             animations["falling"].LoopAnimation = true;
 
-            PlayAnimation("idle");
+            mewFace = Content.Load<Texture2D>(@"Textures\mewFace");
+
+            PlayAnimation("jump");
             timeSincePurr = 0.0f;
+            timeSinceMew = 5.0f;
+            newAnimation = "jump";
         }
 
         #endregion
+
+        float timeSincePurr
+        {
+            get
+            {
+                return purrTime;
+            }
+            set
+            {
+                purrTime = MathHelper.Min(10.0f, value);
+            }
+        }
+
+        float timeSinceMew
+        {
+            get
+            {
+                return mewTime;
+            }
+            set
+            {
+                mewTime = MathHelper.Min(10.0f, value);
+            }
+        }
 
         #region Override Directional Information
 
@@ -157,7 +192,7 @@ namespace HungerPrototype.GameActors
 
         public override void Update(GameTime gameTime)
         {
-            string newAnimation = "idle";
+
             float elapsed = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
             if (InputManager.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.Left))
@@ -170,9 +205,10 @@ namespace HungerPrototype.GameActors
                 Flipped = true;
                 Velocity += Acceleration;
             }
-            if (InputManager.IsKeyReleased(Microsoft.Xna.Framework.Input.Keys.Space) && Velocity.Y==0)
+            if (InputManager.IsKeyReleased(Microsoft.Xna.Framework.Input.Keys.Space) && Velocity.Y == 0)
             {
-                Velocity += new Vector2(0,-400);
+                Velocity += new Vector2(0, -400);
+                timeSincePurr = 0.0f;
             }
 
             if (Velocity.X != 0)
@@ -192,6 +228,14 @@ namespace HungerPrototype.GameActors
             if (timeSincePurr > 4.0f)
                 newAnimation = "purr";
 
+            if (InputManager.IsKeyReleased(Microsoft.Xna.Framework.Input.Keys.LeftControl))
+            {
+                SoundManager.PlayMew();
+                timeSinceMew = 0.0f;
+                timeSincePurr = 0.0f;
+            }
+            timeSinceMew += elapsed;
+
             if (newAnimation != currentAnimation)
                 currentAnimation = newAnimation;
 
@@ -205,5 +249,23 @@ namespace HungerPrototype.GameActors
 
         #endregion
 
+        #region Draw
+
+        public override void Draw(SpriteBatch spriteBatch)
+        {
+            if (timeSinceMew < 0.4f)
+            {
+                SpriteEffects effect = SpriteEffects.None;
+                if (Flipped)
+                {
+                    effect = SpriteEffects.FlipHorizontally;
+                }
+                spriteBatch.Draw(mewFace, CollisionRectangle,
+                    new Rectangle(0,0,50,40), Color.White * Alpha, 0.0f, Vector2.Zero, effect, 0.0f);
+            }
+
+            base.Draw(spriteBatch);
+        }
+        #endregion
     }
 }
