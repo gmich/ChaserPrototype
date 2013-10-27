@@ -11,6 +11,7 @@ namespace HungerPrototype.Managers
     {
         private static SoundEffect mew;
         private static SoundEffect ding;
+        private static SoundEffect attack;
 
         public static void Initialize(ContentManager content)
         {
@@ -18,6 +19,7 @@ namespace HungerPrototype.Managers
             {
                 mew = content.Load<SoundEffect>(@"Sounds\mew");
                 ding = content.Load<SoundEffect>(@"Sounds\ding");
+                attack = content.Load<SoundEffect>(@"Sounds\attack");
             }
             catch
             {
@@ -30,7 +32,7 @@ namespace HungerPrototype.Managers
         {
             try
             {
-                mew.Play(0.1f,0.0f,0.0f);
+                mew.Play(0.4f,0.0f,0.0f);
               
             }
             catch
@@ -49,6 +51,19 @@ namespace HungerPrototype.Managers
             catch
             {
                 Debug.Write("PlayDing Failed");
+            }
+        }
+
+        public static void PlayAttack()
+        {
+            try
+            {
+                attack.Play(0.5f,1.0f, 0.0f);
+
+            }
+            catch
+            {
+                Debug.Write("PlayAttack Failed");
             }
         }
 

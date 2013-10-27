@@ -20,6 +20,7 @@ namespace HungerPrototype.GameActors
         string newAnimation;
         float purrTime;
         float mewTime;
+        float attackTime;
         Texture2D mewFace;
         #endregion 
 
@@ -33,6 +34,9 @@ namespace HungerPrototype.GameActors
 
             animations.Add("run", new AnimationStrip(Content.Load<Texture2D>(@"Textures\Run"), 50, "run"));
             animations["run"].LoopAnimation = true;
+
+            animations.Add("attack", new AnimationStrip(Content.Load<Texture2D>(@"Textures\attack"), 50, "attack"));
+            animations["attack"].LoopAnimation = true;
 
             animations.Add("mew", new AnimationStrip(Content.Load<Texture2D>(@"Textures\Mew"), 50, "mew"));
             animations["mew"].LoopAnimation = true;
@@ -52,7 +56,9 @@ namespace HungerPrototype.GameActors
             PlayAnimation("jump");
             timeSincePurr = 0.0f;
             timeSinceMew = 5.0f;
+            attackTime = 5.0f;
             newAnimation = "jump";
+            MaxVelocity = 400.0f;
         }
 
         #endregion
@@ -81,14 +87,32 @@ namespace HungerPrototype.GameActors
             }
         }
 
+        float timeSinceAttack
+        {
+            get
+            {
+                return attackTime;
+            }
+            set
+            {
+                attackTime = MathHelper.Min(10.0f, value);
+            }
+        }
+
+        float AttackDuration
+        {
+            get
+            {
+                return 0.1f;
+            }
+        }
+
         #region Override Directional Information
 
         float MaxVelocity
         {
-            get
-            {
-                return 400.0f;
-            }    
+            get;
+            set;
 
         }
         Vector2 WindowBoundaries
@@ -120,7 +144,9 @@ namespace HungerPrototype.GameActors
             }
             set
             {
-                velocity.X = MathHelper.Clamp(value.X, -MaxVelocity, MaxVelocity);
+                if (timeSinceAttack > AttackDuration)
+                    velocity.X = MathHelper.Clamp(value.X, -MaxVelocity, MaxVelocity);
+
                 velocity.Y = value.Y;
             }
         }
@@ -228,21 +254,40 @@ namespace HungerPrototype.GameActors
             if (timeSincePurr > 4.0f)
                 newAnimation = "purr";
 
-            if (InputManager.IsKeyReleased(Microsoft.Xna.Framework.Input.Keys.LeftControl))
+            if (InputManager.IsKeyReleased(Microsoft.Xna.Framework.Input.Keys.LeftAlt))
             {
                 SoundManager.PlayMew();
                 timeSinceMew = 0.0f;
                 timeSincePurr = 0.0f;
             }
+
+            if (InputManager.IsKeyReleased(Microsoft.Xna.Framework.Input.Keys.LeftControl) && timeSinceAttack > 0.2f)
+            {
+                //SoundManager.PlayAttack();
+                if (Flipped)
+                    velocity.X = 700;
+                else
+                    velocity.X = -700;
+
+                if (velocity.Y == 0)
+                    velocity.Y -= 90;
+                timeSinceAttack = 0.0f;
+                timeSincePurr = 0.0f;
+                currentAnimation = "attack";
+            }
+
             timeSinceMew += elapsed;
+            timeSinceAttack += elapsed;
 
-            if (newAnimation != currentAnimation)
-                currentAnimation = newAnimation;
-
+            
             Location += Velocity * elapsed;
 
-            ApplyPhyics();
-
+            if (timeSinceAttack > AttackDuration)
+            {
+                if (newAnimation != currentAnimation)
+                    currentAnimation = newAnimation;
+                ApplyPhyics();
+            }
             base.Update(gameTime);
 
         }
