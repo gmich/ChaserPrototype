@@ -19,11 +19,16 @@ namespace HungerPrototype.GameActors
 
         #region Constructor
 
-        public Actor(ContentManager Content, Vector2 location, int Width, int Height)
+        public Actor(Vector2 location, int Width, int Height,float drawDepth)
         {
             this.Location = location;
             this.Width = Width;
             this.Height = Height;
+            this.DrawDepth = drawDepth;
+            Flipped = false;
+            Inactive = false;
+            Velocity = Vector2.Zero;
+            Alpha = 1.0f;
         }
 
         #endregion 
@@ -38,7 +43,7 @@ namespace HungerPrototype.GameActors
 
         #region Movement
 
-        virtual Vector2 Velocity
+        public virtual Vector2 Velocity
         {
             get;
             set;
@@ -48,31 +53,37 @@ namespace HungerPrototype.GameActors
 
         #region Information About Screen Rendering
 
-        bool Flipped
+        public float Alpha
         {
             get;
             set;
         }
 
-        virtual Vector2 Location
+        protected bool Flipped
         {
             get;
             set;
         }
 
-        float DrawDepth
+        public virtual Vector2 Location
         {
             get;
             set;
         }
 
-        float Width
+        protected float DrawDepth
         {
             get;
             set;
         }
 
-        float Height
+        protected int Width
+        {
+            get;
+            set;
+        }
+
+        protected int Height
         {
             get;
             set;
@@ -80,8 +91,10 @@ namespace HungerPrototype.GameActors
 
         protected Rectangle CollisionRectangle
         {
-            get;
-            set;
+            get
+            {
+                return new Rectangle((int)Location.X, (int)Location.Y, Width, Height);
+            }
         }
 
         #endregion
@@ -90,7 +103,7 @@ namespace HungerPrototype.GameActors
 
         #region Helper Methods
 
-        void PlayAnimation(string name)
+        protected void PlayAnimation(string name)
         {
             if (!(name == null) && animations.ContainsKey(name))
             {
@@ -118,7 +131,12 @@ namespace HungerPrototype.GameActors
 
         #region Collision Detection Methods
 
-        protected void CollisionTest();
+        protected virtual void CollisionTest() { }
+
+        public bool CollidesWith(Actor actor)
+        {
+            return this.CollisionRectangle.Intersects(actor.CollisionRectangle);
+        }
 
         #endregion
 
@@ -126,10 +144,8 @@ namespace HungerPrototype.GameActors
 
         public virtual void Update(GameTime gameTime)
         {
-            float elapsed = (float)gameTime.ElapsedGameTime.TotalSeconds;
-
+            CollisionTest();
             UpdateAnimation(gameTime);
-
         }
 
         #endregion
@@ -148,7 +164,7 @@ namespace HungerPrototype.GameActors
                     effect = SpriteEffects.FlipHorizontally;
                 }
                 spriteBatch.Draw(animations[currentAnimation].Texture,CollisionRectangle,
-                    animations[currentAnimation].FrameRectangle, Color.White, 0.0f, Vector2.Zero, effect, drawDepth);
+                    animations[currentAnimation].FrameRectangle, Color.White * Alpha, 0.0f, Vector2.Zero, effect, DrawDepth);
             }
         }
 

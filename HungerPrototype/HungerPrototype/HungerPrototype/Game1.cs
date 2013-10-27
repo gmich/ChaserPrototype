@@ -11,6 +11,9 @@ using Microsoft.Xna.Framework.Media;
 
 namespace HungerPrototype
 {
+    using GameActors;
+    using Managers;
+
     /// <summary>
     /// This is the main type for your game
     /// </summary>
@@ -18,10 +21,17 @@ namespace HungerPrototype
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
+        Texture2D background;
+        LevelManager levelManager;
 
         public Game1()
         {
-            graphics = new GraphicsDeviceManager(this);
+            this.graphics = new GraphicsDeviceManager(this)
+            {
+                PreferMultiSampling = true,
+                PreferredBackBufferWidth = 1000,
+                PreferredBackBufferHeight = 600
+            };
             Content.RootDirectory = "Content";
         }
 
@@ -46,7 +56,8 @@ namespace HungerPrototype
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
-
+            levelManager = new LevelManager(Content);
+            background = Content.Load<Texture2D>(@"Textures\background");
             // TODO: use this.Content to load your game content here
         }
 
@@ -70,6 +81,8 @@ namespace HungerPrototype
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
                 this.Exit();
 
+            Input.InputManager.Update(gameTime);
+            levelManager.Update(gameTime);
             // TODO: Add your update logic here
 
             base.Update(gameTime);
@@ -83,7 +96,12 @@ namespace HungerPrototype
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            // TODO: Add your drawing code here
+            spriteBatch.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
+            
+            levelManager.Draw(spriteBatch);
+            spriteBatch.Draw(background, new Rectangle(0, 0, (int)GraphicsDevice.Viewport.Width, (int)GraphicsDevice.Viewport.Height),null,Color.White,0.0f,Vector2.Zero,SpriteEffects.None,1.0f);
+            
+            spriteBatch.End();
 
             base.Draw(gameTime);
         }
