@@ -38,6 +38,9 @@ namespace HungerPrototype.GameActors
             animations.Add("attack", new AnimationStrip(Content.Load<Texture2D>(@"Textures\attack"), 50, "attack"));
             animations["attack"].LoopAnimation = true;
 
+            animations.Add("crouch", new AnimationStrip(Content.Load<Texture2D>(@"Textures\crouch"), 50, "crouch"));
+            animations["crouch"].LoopAnimation = true;
+
             animations.Add("mew", new AnimationStrip(Content.Load<Texture2D>(@"Textures\Mew"), 50, "mew"));
             animations["mew"].LoopAnimation = true;
 
@@ -59,10 +62,24 @@ namespace HungerPrototype.GameActors
             attackTime = 5.0f;
             newAnimation = "jump";
             MaxVelocity = 400.0f;
+            IsCrouching = false;
         }
 
         #endregion
 
+        bool IsCrouching
+        {
+            get;
+            set;
+        }
+
+        bool IsAttacking
+        {
+            get
+            {
+                return timeSinceAttack < attackTime;
+            }
+        }
         float timeSincePurr
         {
             get
@@ -221,20 +238,52 @@ namespace HungerPrototype.GameActors
 
             float elapsed = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-            if (InputManager.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.Left))
+            if (InputManager.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.Down) && velocity.Y==0)
             {
-                Flipped = false;
-                Velocity -= Acceleration;
-            }
-            if (InputManager.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.Right))
-            {
-                Flipped = true;
-                Velocity += Acceleration;
-            }
-            if (InputManager.IsKeyReleased(Microsoft.Xna.Framework.Input.Keys.Space) && Velocity.Y == 0)
-            {
-                Velocity += new Vector2(0, -400);
+                IsCrouching = true;
                 timeSincePurr = 0.0f;
+            }
+            else
+            {
+                IsCrouching = false;
+            }
+
+            if (!IsCrouching)
+            {
+                if (InputManager.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.Left))
+                {
+                    Flipped = false;
+                    Velocity -= Acceleration;
+                }
+                if (InputManager.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.Right))
+                {
+                    Flipped = true;
+                    Velocity += Acceleration;
+                }
+
+                if (InputManager.IsKeyReleased(Microsoft.Xna.Framework.Input.Keys.Space) && Velocity.Y == 0)
+                {
+                    Velocity += new Vector2(0, -400);
+                    timeSincePurr = 0.0f;
+                }
+            }
+            else
+            {
+                if (InputManager.IsKeyReleased(Microsoft.Xna.Framework.Input.Keys.LeftAlt))
+                {
+                    IsCrouching = false;
+                    //SoundManager.PlayAttack();
+                    if (Flipped)
+                        velocity.X = 700;
+                    else
+                        velocity.X = -700;
+
+                    if (velocity.Y == 0)
+                        velocity.Y -= 90;
+                    timeSinceAttack = 0.0f;
+                    timeSincePurr = 0.0f;
+                    currentAnimation = "attack";
+                }
             }
 
             if (Velocity.X != 0)
@@ -254,33 +303,22 @@ namespace HungerPrototype.GameActors
             if (timeSincePurr > 4.0f)
                 newAnimation = "purr";
 
-            if (InputManager.IsKeyReleased(Microsoft.Xna.Framework.Input.Keys.LeftAlt))
+            if (InputManager.IsKeyReleased(Microsoft.Xna.Framework.Input.Keys.LeftControl))
             {
                 SoundManager.PlayMew();
                 timeSinceMew = 0.0f;
                 timeSincePurr = 0.0f;
             }
-
-            if (InputManager.IsKeyReleased(Microsoft.Xna.Framework.Input.Keys.LeftControl) && timeSinceAttack > 0.2f)
-            {
-                //SoundManager.PlayAttack();
-                if (Flipped)
-                    velocity.X = 700;
-                else
-                    velocity.X = -700;
-
-                if (velocity.Y == 0)
-                    velocity.Y -= 90;
-                timeSinceAttack = 0.0f;
-                timeSincePurr = 0.0f;
-                currentAnimation = "attack";
-            }
+                     
 
             timeSinceMew += elapsed;
             timeSinceAttack += elapsed;
 
             
             Location += Velocity * elapsed;
+
+            if (IsCrouching && !IsAttacking)
+                newAnimation = "crouch";
 
             if (timeSinceAttack > AttackDuration)
             {
@@ -301,11 +339,17 @@ namespace HungerPrototype.GameActors
             if (timeSinceMew < 0.4f)
             {
                 SpriteEffects effect = SpriteEffects.None;
+                Rectangle rect;
+                if (IsCrouching)
+                    rect = new Rectangle((int)location.X, (int)location.Y + 5, Width, Height);
+                else
+                    rect = CollisionRectangle;
+
                 if (Flipped)
                 {
                     effect = SpriteEffects.FlipHorizontally;
                 }
-                spriteBatch.Draw(mewFace, CollisionRectangle,
+                spriteBatch.Draw(mewFace, rect,
                     new Rectangle(0,0,50,40), Color.White * Alpha, 0.0f, Vector2.Zero, effect, 0.0f);
             }
 
