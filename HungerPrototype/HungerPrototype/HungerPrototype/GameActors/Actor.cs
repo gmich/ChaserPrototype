@@ -43,6 +43,13 @@ namespace HungerPrototype.GameActors
 
         #region Movement
 
+        protected float MaxVelocity
+        {
+            get;
+            set;
+
+        }
+
         public virtual Vector2 Velocity
         {
             get;
@@ -77,13 +84,13 @@ namespace HungerPrototype.GameActors
             set;
         }
 
-        protected int Width
+        public int Width
         {
             get;
             set;
         }
 
-        protected int Height
+        public int Height
         {
             get;
             set;
@@ -136,6 +143,11 @@ namespace HungerPrototype.GameActors
         public virtual bool CollidesWith(Actor actor)
         {
             return this.CollisionRectangle.Intersects(actor.CollisionRectangle);
+        }
+
+        public virtual void ElasticCollision(Actor actor)
+        {
+            this.Velocity = new Vector2(actor.Velocity.X*10,Velocity.Y);
         }
 
         #endregion

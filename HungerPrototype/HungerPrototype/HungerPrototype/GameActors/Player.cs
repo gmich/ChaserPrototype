@@ -126,12 +126,6 @@ namespace HungerPrototype.GameActors
 
         #region Override Directional Information
 
-        float MaxVelocity
-        {
-            get;
-            set;
-
-        }
         Vector2 WindowBoundaries
         {
             get

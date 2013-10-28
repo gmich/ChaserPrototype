@@ -113,6 +113,7 @@
     <Compile Include="Diagnostics\FPSMonitor.cs" />
     <Compile Include="GameActors\Actor.cs" />
     <Compile Include="Animations\AnimationStrip.cs" />
+    <Compile Include="GameActors\Enemy.cs" />
     <Compile Include="GameActors\Food.cs" />
     <Compile Include="GameActors\Player.cs" />
     <Compile Include="Input\InputManager.cs" />
