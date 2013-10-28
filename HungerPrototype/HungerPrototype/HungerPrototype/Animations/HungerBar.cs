@@ -62,7 +62,7 @@ namespace HungerPrototype.Animations
             get
             {
                 int offSet=2;
-                return new Rectangle((int)Location.X+offSet, (int)Location.Y+offSet,(int)frameSize.X-offSet, (int)frameSize.Y-offSet); 
+                return new Rectangle((int)Location.X+offSet, (int)Location.Y+offSet,(int)frameSize.X, (int)frameSize.Y); 
             }
         }
 

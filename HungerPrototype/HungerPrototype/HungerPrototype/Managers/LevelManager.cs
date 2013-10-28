@@ -52,7 +52,7 @@ namespace HungerPrototype.Managers
         {
             food = new List<Actor>();
             enemies = new List<Enemy>();
-            player = new Player(Content, new Vector2(400, 600), 40, 40, 0.9f);
+            player = new Player(Content, new Vector2(400, 500), 40, 40, 0.9f);
             timeSinceLastFood = 0.0f;
             timeSinceLastEnemy = 10.0f;
             currEnemies = 0;
@@ -185,7 +185,7 @@ namespace HungerPrototype.Managers
             foreach(Enemy enemy in enemies)
                 enemy.Draw(spriteBatch);
 
-            spriteBatch.DrawString(scoreFont,"Cat: " +catScore.ToString() + "    Enemy: " + enemyScore.ToString(), new Vector2(10,10), Color.Black);
+            spriteBatch.DrawString(scoreFont,"Cat: " +catScore.ToString() + "    Opponent: " + enemyScore.ToString(), new Vector2(10,10), Color.Black);
         }
     }
 }

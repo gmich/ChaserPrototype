@@ -23,6 +23,8 @@ namespace HungerPrototype
         SpriteBatch spriteBatch;
         Texture2D background;
         LevelManager levelManager;
+        bool paused;
+        SpriteFont font;
 
         public Game1()
         {
@@ -43,8 +45,8 @@ namespace HungerPrototype
         /// </summary>
         protected override void Initialize()
         {
-            // TODO: Add your initialization logic here
-
+            this.IsMouseVisible = true;
+            paused = true;
             base.Initialize();
         }
 
@@ -59,6 +61,7 @@ namespace HungerPrototype
             levelManager = new LevelManager(Content);
             SoundManager.Initialize(Content);
             background = Content.Load<Texture2D>(@"Textures\background");
+            font = Content.Load<SpriteFont>(@"Fonts\pausedFont");
             // TODO: use this.Content to load your game content here
         }
 
@@ -83,8 +86,14 @@ namespace HungerPrototype
                 this.Exit();
 
             Input.InputManager.Update(gameTime);
-            levelManager.Update(gameTime);
-            // TODO: Add your update logic here
+
+            if (Input.InputManager.IsKeyReleased(Keys.P))
+            {
+                paused = !paused;
+            }
+
+            if(!paused)
+                levelManager.Update(gameTime);
 
             base.Update(gameTime);
         }
@@ -101,7 +110,10 @@ namespace HungerPrototype
             
             levelManager.Draw(spriteBatch);
             spriteBatch.Draw(background, new Rectangle(0, 0, (int)GraphicsDevice.Viewport.Width, (int)GraphicsDevice.Viewport.Height),null,Color.White,0.0f,Vector2.Zero,SpriteEffects.None,1.0f);
-            
+           
+            if(paused)
+                spriteBatch.DrawString(font, "Press <P> to play", new Vector2(GraphicsDevice.Viewport.Width/3 + 20 , GraphicsDevice.Viewport.Height/2 - 20), Color.Black);
+
             spriteBatch.End();
 
             base.Draw(gameTime);
