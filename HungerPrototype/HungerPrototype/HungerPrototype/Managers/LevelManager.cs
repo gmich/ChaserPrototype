@@ -15,34 +15,50 @@ namespace HungerPrototype.Managers
 
         List<Actor> food;
         List<Enemy> enemies;
-        Actor player;
+        Player player;
         Texture2D burgerTexture;
         Texture2D vodkaTexture;
         Texture2D enemyTexture;
         SpriteFont scoreFont;
-        int score;
+
+        int catScore;
+        int enemyScore;
+        int currEnemies;
+
         float timeSinceLastFood;
         float timeSinceLastEnemy;
-        int currEnemies;
+
         Random rand;
+        ContentManager Content;
 
         #endregion
 
         public LevelManager(ContentManager Content)
         {
-            food = new List<Actor>();
-            enemies = new List<Enemy>();
-            player = new Player(Content, new Vector2(400, 200), 40, 40, 0.9f);
+            this.Content = Content;
             burgerTexture = Content.Load<Texture2D>(@"Textures\burger");
             vodkaTexture = Content.Load<Texture2D>(@"Textures\vodka");
             enemyTexture = Content.Load<Texture2D>(@"Textures\Enemy\run");
             scoreFont = Content.Load<SpriteFont>(@"Fonts\scoreFont");
-            timeSinceLastFood = 0.0f;
-            timeSinceLastEnemy = 5.0f;
+
             rand = new Random();
-            score = 0;
+            catScore = enemyScore = 0;
+            NewGame();
+        }
+
+        #region New Game
+
+        void NewGame()
+        {
+            food = new List<Actor>();
+            enemies = new List<Enemy>();
+            player = new Player(Content, new Vector2(400, 600), 40, 40, 0.9f);
+            timeSinceLastFood = 0.0f;
+            timeSinceLastEnemy = 10.0f;
             currEnemies = 0;
         }
+
+        #endregion
 
         #region Properties
 
@@ -85,11 +101,30 @@ namespace HungerPrototype.Managers
                 else
                     spawnLocation = new Vector2(1200, 600);
 
-                enemies.Add(new Enemy(enemyTexture,spawnLocation, 50, 66, 0.7f));
+                enemies.Add(new Enemy(Content, enemyTexture,spawnLocation, 50, 66, 0.7f));
+            }
+        }
+
+        void CheckVictory()
+        {
+            foreach (Enemy enemy in enemies)
+            {
+                if (enemy.IsHungry())
+                {
+                    NewGame();
+                    catScore++;
+                }
+            }
+
+            if (player.IsHungry())
+            {
+                NewGame();
+                enemyScore++;
             }
         }
 
         #endregion
+
         public void Update(GameTime gameTime)
         {
             timeSinceLastFood += (float)gameTime.ElapsedGameTime.TotalSeconds;
@@ -120,8 +155,8 @@ namespace HungerPrototype.Managers
                 {
                     if ((food[i].CollidesWith(enemy)))
                     {
-                        score--;
                         food.RemoveAt(i);
+                        enemy.ManipulateHungerBar(2.0f);
                         SoundManager.PlayDing(-1.0f);
                         return;
                     }
@@ -130,12 +165,14 @@ namespace HungerPrototype.Managers
                 if ((food[i].CollidesWith(player)))
                 {
                     food.RemoveAt(i);
+                    player.ManipulateHungerBar(3.0f);
                     SoundManager.PlayDing(1.0f);
-                    score++;
                 }
                 else if (food[i].Inactive)
                     food.RemoveAt(i);
             }
+
+            CheckVictory();
         }
 
         public void Draw(SpriteBatch spriteBatch)
@@ -148,7 +185,7 @@ namespace HungerPrototype.Managers
             foreach(Enemy enemy in enemies)
                 enemy.Draw(spriteBatch);
 
-            spriteBatch.DrawString(scoreFont,score.ToString(), new Vector2(10,10), Color.Black);
+            spriteBatch.DrawString(scoreFont,"Cat: " +catScore.ToString() + "    Enemy: " + enemyScore.ToString(), new Vector2(10,10), Color.Black);
         }
     }
 }

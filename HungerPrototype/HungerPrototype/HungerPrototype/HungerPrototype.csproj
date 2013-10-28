@@ -110,6 +110,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Animations\HungerBar.cs" />
     <Compile Include="Diagnostics\FPSMonitor.cs" />
     <Compile Include="GameActors\Actor.cs" />
     <Compile Include="Animations\AnimationStrip.cs" />

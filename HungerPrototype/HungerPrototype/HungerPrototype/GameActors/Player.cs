@@ -22,6 +22,8 @@ namespace HungerPrototype.GameActors
         float mewTime;
         float attackTime;
         Texture2D mewFace;
+        HungerBar hungerBar;
+
         #endregion 
 
         #region Constructor
@@ -63,6 +65,8 @@ namespace HungerPrototype.GameActors
             newAnimation = "jump";
             MaxVelocity = 400.0f;
             IsCrouching = false;
+
+            hungerBar = new HungerBar(Content.Load<SpriteFont>(@"Fonts\nameFont"), Content.Load<Texture2D>(@"Textures\HungerBar\frameTexture"), Content.Load<Texture2D>(@"Textures\HungerBar\fillingTexture"), new Vector2(10, 100), new Vector2(280, 30), 25.0f, Color.Red, "Cat");
         }
 
         #endregion
@@ -182,6 +186,20 @@ namespace HungerPrototype.GameActors
 
         #endregion
 
+        #region HungerBar
+
+        public void ManipulateHungerBar(float value)
+        {
+            hungerBar.ManipulateHunger(value);
+        }
+
+        public bool IsHungry()
+        {
+            return hungerBar.IsHungry;
+        }
+
+        #endregion
+
         #region Physics Helper Methods
 
         Vector2 Friction
@@ -223,13 +241,24 @@ namespace HungerPrototype.GameActors
 
         }
 
+        void Attack(float force)
+        {
+            IsCrouching = false;
+            velocity.X = force;
+
+            if (velocity.Y == 0)
+                velocity.Y -= 90;
+            timeSinceAttack = 0.0f;
+            timeSincePurr = 0.0f;
+            currentAnimation = "attack";
+        }
+
         #endregion
 
         #region Update
 
         public override void Update(GameTime gameTime)
         {
-
             float elapsed = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
             if (InputManager.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.Down) && velocity.Y==0)
@@ -255,7 +284,7 @@ namespace HungerPrototype.GameActors
                     Velocity += Acceleration;
                 }
 
-                if (InputManager.IsKeyReleased(Microsoft.Xna.Framework.Input.Keys.Space) && Velocity.Y == 0)
+                if (InputManager.IsKeyReleased(Microsoft.Xna.Framework.Input.Keys.Up) && Velocity.Y == 0)
                 {
                     Velocity += new Vector2(0, -400);
                     timeSincePurr = 0.0f;
@@ -263,20 +292,18 @@ namespace HungerPrototype.GameActors
             }
             else
             {
-                if (InputManager.IsKeyReleased(Microsoft.Xna.Framework.Input.Keys.LeftAlt))
+                if (InputManager.IsKeyReleased(Microsoft.Xna.Framework.Input.Keys.Left))
                 {
-                    IsCrouching = false;
-                    //SoundManager.PlayAttack();
-                    if (Flipped)
-                        velocity.X = 700;
-                    else
-                        velocity.X = -700;
-
-                    if (velocity.Y == 0)
-                        velocity.Y -= 90;
-                    timeSinceAttack = 0.0f;
+                    Attack(-700);
+                }
+                else if (InputManager.IsKeyReleased(Microsoft.Xna.Framework.Input.Keys.Right))
+                {
+                    Attack(700);
+                }
+                else if (InputManager.IsKeyReleased(Microsoft.Xna.Framework.Input.Keys.Up) && Velocity.Y == 0)
+                {
+                    Velocity += new Vector2(0, -500);
                     timeSincePurr = 0.0f;
-                    currentAnimation = "attack";
                 }
             }
 
@@ -297,7 +324,7 @@ namespace HungerPrototype.GameActors
             if (timeSincePurr > 4.0f)
                 newAnimation = "purr";
 
-            if (InputManager.IsKeyReleased(Microsoft.Xna.Framework.Input.Keys.LeftControl))
+            if (InputManager.IsKeyReleased(Microsoft.Xna.Framework.Input.Keys.Space))
             {
                 SoundManager.PlayMew();
                 timeSinceMew = 0.0f;
@@ -322,6 +349,7 @@ namespace HungerPrototype.GameActors
             }
             base.Update(gameTime);
 
+            hungerBar.Update(gameTime);
         }
 
         #endregion
@@ -348,6 +376,8 @@ namespace HungerPrototype.GameActors
             }
 
             base.Draw(spriteBatch);
+
+            hungerBar.Draw(spriteBatch);
         }
         #endregion
     }

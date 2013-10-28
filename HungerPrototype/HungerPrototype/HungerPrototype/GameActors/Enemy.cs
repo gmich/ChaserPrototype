@@ -18,12 +18,13 @@ namespace HungerPrototype.GameActors
         Vector2 velocity;
         Vector2 location;
         Actor target;
+        HungerBar hungerBar;
 
         #endregion
 
         #region Constructor
 
-        public Enemy(Texture2D animationStrip, Vector2 Location, int Width, int Height, float drawDepth)
+        public Enemy(ContentManager Content, Texture2D animationStrip, Vector2 Location, int Width, int Height, float drawDepth)
             : base(Location, Width, Height, drawDepth)
         {
 
@@ -32,6 +33,7 @@ namespace HungerPrototype.GameActors
 
             currentAnimation = "run";
             MaxVelocity = 300.0f;
+            hungerBar = new HungerBar(Content.Load<SpriteFont>(@"Fonts\nameFont"),Content.Load<Texture2D>(@"Textures\HungerBar\frameTexture"), Content.Load<Texture2D>(@"Textures\HungerBar\fillingTexture"), new Vector2(10, 150), new Vector2(280, 30), 25.0f,Color.Blue,"Opponent");
         }
 
         #endregion
@@ -89,6 +91,20 @@ namespace HungerPrototype.GameActors
             {
                 return new Vector2(40, 0);
             }
+        }
+
+        #endregion
+
+        #region HungerBar
+
+        public void ManipulateHungerBar(float value)
+        {
+            hungerBar.ManipulateHunger(value);
+        }
+
+        public bool IsHungry()
+        {
+            return hungerBar.IsHungry;
         }
 
         #endregion
@@ -184,8 +200,17 @@ namespace HungerPrototype.GameActors
             ApplyPhyics();
 
             base.Update(gameTime);
+
+            hungerBar.Update(gameTime);
         }
 
         #endregion
+
+        public override void Draw(SpriteBatch spriteBatch)
+        {
+            base.Draw(spriteBatch);
+
+            hungerBar.Draw(spriteBatch);
+        }
     }
 }
